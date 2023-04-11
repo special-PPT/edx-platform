@@ -119,7 +119,7 @@ $(COMMON_CONSTRAINTS_TXT):
 compile-requirements: export CUSTOM_COMPILE_COMMAND=make upgrade
 compile-requirements: $(COMMON_CONSTRAINTS_TXT) ## Re-compile *.in requirements to *.txt
 	pip install -q pip-tools
-	pip-compile --allow-unsafe --upgrade -o requirements/edx/pip.txt requirements/edx/pip.in
+	pip-compile --allow-unsafe ${COMPILE_OPTS} -o requirements/edx/pip.txt requirements/edx/pip.in
 
 	@ export REBUILD='--rebuild'; \
 	for f in $(REQ_FILES); do \
