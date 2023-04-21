@@ -151,39 +151,57 @@ from openedx.core.djangolib.js_utils import (
 % endif;
 % if public_video_url:
 <script>
+  // --------------------------------------
+  // Social Sharing
+  // --------------------------------------
+
+  const doSocialShare = (source, href, generateSocialShareSiteUrl) => {
+      var utmQuery = $.param({
+        utm_source: source,
+        utm_medium: 'social',
+        utm_campaign: 'social-share-exp',
+      })
+      var sharedVideoUrl = encodeURIComponent(href + "?" + utmQuery);
+      var socialMediaShareLinkUrl = generateSocialShareSiteUrl(sharedVideoUrl);
+      window.open(
+        socialMediaShareLinkUrl,
+        'targetWindow',
+        'toolbar=no,location=0,status=no,menubar=no,scrollbars=yes,resizable=yes,width=600,height=400'
+      );
+      return false;
+  };
+  // ------------------
+  // Twitter
+  // ------------------
   $("#twitter-share-button").click(function() {
-    var tweetText = encodeURIComponent("Here\'s a fun clip from a class I\'m taking on @edXonline.\n\n");
-    var utmQuery =  $.param({
-      utm_source: 'twitter',
-      utm_medium: 'social',
-      utm_campaign: 'social-share-exp',
-    });
-    var url = encodeURIComponent(this.href + "?" + utmQuery);
-    var tweetUrl = "https://twitter.com/intent/tweet?text=" + tweetText + "&url=" + url;
-    window.open(tweetUrl,'targetWindow','toolbar=no,location=0,status=no,menubar=no,scrollbars=yes,resizable=yes,width=600,height=400');
-    return false;
+    return doSocialShare(
+        'twitter',
+        this.href,
+        (url) => {
+          var tweetText = encodeURIComponent("Here\'s a fun clip from a class I\'m taking on @edXonline.\n\n");
+          return "https://twitter.com/intent/tweet?text=" + tweetText + "&url=" + url;
+        }
+      )
   });
-  $("#facebook-share-button").click(function() {
-    var utmQuery =  $.param({
-      utm_source: 'facebook',
-      utm_medium: 'social',
-      utm_campaign: 'social-share-exp',
+ 
+  // -----------------------------------------------------
+  // "Simple" sharing, urls with only the one parameter
+  // -----------------------------------------------------
+  const simpleSocialShareSites = {
+      'facebook': 'https://www.facebook.com/sharer/sharer.php?u=',
+      'linkedin': 'https://www.linkedin.com/sharing/share-offsite/?url=',
+  }
+  const doSimpleSocialShare = (source, href) => {
+    return doSocialShare(
+      source,
+      href,
+      url => simpleSocialShareSites[source] + url,
+    )
+  }
+  _.each(_.keys(simpleSocialShareSites), (source) => {
+    $("#" + source + "-share-button").click(function() {
+        return doSimpleSocialShare(source, this.href);
     });
-    var url = encodeURIComponent(this.href + "?" + utmQuery);
-    const facebookUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + url;
-    window.open(facebookUrl,'targetWindow','toolbar=no,location=0,status=no,menubar=no,scrollbars=yes,resizable=yes,width=600,height=400');
-    return false;
-  });
-  $("#linkedin-share-button").click(function() {
-    var utmQuery =  $.param({
-      utm_source: 'linkedin',
-      utm_medium: 'social',
-      utm_campaign: 'social-share-exp',
-    });
-    var url = encodeURIComponent(this.href + "?" + utmQuery);
-    const linkedinUrl = 'https://www.linkedin.com/sharing/share-offsite/?url=' + url;
-    window.open(linkedinUrl,'targetWindow','toolbar=no,location=0,status=no,menubar=no,scrollbars=yes,resizable=yes,width=600,height=400');
-    return false;
   });
 </script>
 % endif
